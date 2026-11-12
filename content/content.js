@@ -60,6 +60,12 @@
     setVar("palavras", active ? `${s.wordSpacing}em` : null);
     setVar("zoom", active ? s.fontSize / 100 : null);
 
+    // Apoios de leitura (aba "Mais" do popup)
+    flag("esquerda", active && s.alignLeft);
+    flag("curtas", active && s.shortLines);
+    flag("simples", active && s.plainText);
+    LA.setRuler(active && s.readingRuler); // ver content/regua.js
+
     // Item 3: cores
     flag("cores", colors);
     setVar("fundo", colors?.bg);

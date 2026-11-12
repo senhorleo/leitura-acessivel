@@ -95,7 +95,7 @@
   window.addEventListener("pagehide", flush);
 
   /* ================================================================
-   * Abas do popup (Texto / Cores / Voz)
+   * Abas do popup (Texto / Cores / Voz / Mais)
    * Padrão "tabs" da WAI-ARIA: clique ou setas ← → trocam de aba; só a
    * aba ativa entra na ordem do Tab. A última aba usada fica lembrada.
    * ================================================================ */
@@ -253,6 +253,20 @@
     $("cores-personalizadas").hidden = settings.colorScheme !== "personalizado";
     $("customBg").value = settings.customBg;
     $("customFg").value = settings.customFg;
+  }
+
+  /* ================================================================
+   * Apoios de leitura (aba "Mais")
+   * Caixas de seleção: o id de cada uma é o nome da configuração.
+   * ================================================================ */
+  const APOIOS = ["readingRuler", "alignLeft", "shortLines", "plainText"];
+
+  for (const key of APOIOS) {
+    $(key).addEventListener("change", (e) => save({ [key]: e.target.checked }));
+  }
+
+  function renderApoios() {
+    for (const key of APOIOS) $(key).checked = settings[key];
   }
 
   /* ================================================================
@@ -425,6 +439,7 @@
     renderFonte();
     renderSliders();
     renderCores();
+    renderApoios();
   }
 
   render();

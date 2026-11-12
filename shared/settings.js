@@ -37,6 +37,12 @@ LA.DEFAULTS = Object.freeze({
   customBg: "#fdf6e3",
   customFg: "#222222",
 
+  // Apoios de leitura (aba "Mais")
+  readingRuler: false, // régua que segue o mouse e escurece o resto da tela
+  alignLeft: false,    // alinhar o texto à esquerda (sem "justificado")
+  shortLines: false,   // limitar o comprimento das linhas
+  plainText: false,    // tirar itálico e maiúsculas forçadas pelo site
+
   // Leitura em voz alta (item 4)
   ttsRate: 1,         // velocidade da fala (1 = normal)
   ttsVoice: "",       // nome da voz escolhida ("" = escolher pt-BR automaticamente)

@@ -27,13 +27,14 @@
     Ajustes: LIGADOS
   </button>
 
-  <!-- Abas: dividem os controles em três telas curtas, para o popup
+  <!-- Abas: dividem os controles em quatro telas curtas, para o popup
        caber na janela sem precisar rolar. Padrão de acessibilidade
        "tabs" (WAI-ARIA): setas ← → trocam de aba. -->
   <div class="abas" role="tablist" aria-label="Grupos de ajustes">
     <button role="tab" id="aba-texto" aria-controls="painel-texto" aria-selected="true">Texto</button>
     <button role="tab" id="aba-cores" aria-controls="painel-cores" aria-selected="false" tabindex="-1">Cores</button>
     <button role="tab" id="aba-voz" aria-controls="painel-voz" aria-selected="false" tabindex="-1">Voz</button>
+    <button role="tab" id="aba-mais" aria-controls="painel-mais" aria-selected="false" tabindex="-1">Mais</button>
   </div>
 
   <!-- Aba 1: fonte, tamanho e espaçamentos (itens 1 e 2) -------------->
@@ -122,6 +123,32 @@
       <option value="">Automática (português do Brasil)</option>
     </select>
     <p id="voz-aviso" class="dica" hidden></p>
+  </section>
+
+  <!-- Aba 4: apoios de leitura ---------------------------------------->
+  <section id="painel-mais" role="tabpanel" aria-labelledby="aba-mais" tabindex="0" hidden>
+    <!-- Cada apoio é uma caixa de seleção com uma explicação curta.
+         O id de cada <input> é o nome da configuração. -->
+    <label class="opcao">
+      <input type="checkbox" id="readingRuler">
+      <span><strong>Régua de leitura</strong>
+        <small>Faixa que segue o mouse.</small></span>
+    </label>
+    <label class="opcao">
+      <input type="checkbox" id="alignLeft">
+      <span><strong>Alinhar à esquerda</strong>
+        <small>Tira o texto justificado.</small></span>
+    </label>
+    <label class="opcao">
+      <input type="checkbox" id="shortLines">
+      <span><strong>Linhas mais curtas</strong>
+        <small>Até 70 letras por linha.</small></span>
+    </label>
+    <label class="opcao">
+      <input type="checkbox" id="plainText">
+      <span><strong>Sem itálico e maiúsculas</strong>
+        <small>Itálico vira negrito.</small></span>
+    </label>
   </section>
 
   <!-- Rodapé: desligar só neste site e restaurar padrão (item 5) ------->

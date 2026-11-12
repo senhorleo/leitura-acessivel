@@ -16,6 +16,7 @@ dislexia**.
 | 3 | **Cores de fundo e texto**: creme, bege, azul claro, cinza escuro ou personalizada | |
 | 4 | **Leitura em voz alta** da seleção ou da página, com play/pausa/parar e velocidade. A **frase que está sendo lida fica destacada** em amarelo e a página rola sozinha | Web Speech API, voz pt-BR |
 | 5 | **Restaurar padrão** e **desligar só em um site** | |
+| + | **Apoios de leitura**: régua que segue o mouse, alinhar à esquerda, linhas mais curtas, sem itálico e maiúsculas | aba **Mais** |
 | + | **Fixar o painel** (alfinete): os controles ficam abertos na barra lateral enquanto você navega | barra lateral do navegador |
 
 As configurações ficam salvas (`storage.local`) e valem para todas as abas,
@@ -61,8 +62,8 @@ Ela funciona sem internet e foi feita para a apresentação. Também vale
 testar em sites reais, como Wikipédia, G1, o site da UFABC, o SIGAA ou o
 GitHub.
 
-O popup tem o botão geral no topo, três abas (**Texto**, **Cores**, **Voz**)
-e, embaixo, os botões do site atual e de restaurar.
+O popup tem o botão geral no topo, quatro abas (**Texto**, **Cores**, **Voz**,
+**Mais**) e, embaixo, os botões do site atual e de restaurar.
 
 | Funcionalidade | Passo a passo | O que deve acontecer |
 |---|---|---|
@@ -78,6 +79,10 @@ e, embaixo, os botões do site atual e de restaurar.
 | **4. Destaque** | Observe a página durante a leitura | A frase falada fica com fundo amarelo e a página rola para acompanhá-la. |
 | **4. Pausa/Parar** | **Pausar** → **Continuar** → **Parar** | A fala pausa, continua de onde parou e para. A leitura **continua mesmo com o popup fechado**. |
 | **4. Velocidade** | Mexa em **Velocidade** durante a leitura | A nova velocidade vale a partir da próxima frase. |
+| **Régua de leitura** | Aba **Mais** → **Régua de leitura** e mova o mouse sobre a página | Uma faixa clara segue o mouse e o resto da tela escurece. Os cliques continuam funcionando. |
+| **Alinhar à esquerda** | **Alinhar à esquerda** | O parágrafo justificado da página de teste fica alinhado à esquerda. Títulos centralizados não mudam. |
+| **Linhas mais curtas** | **Linhas mais curtas** (use a janela bem larga) | Os parágrafos ficam com cerca de 70 letras por linha. |
+| **Sem itálico e maiúsculas** | **Sem itálico e maiúsculas** | O trecho em itálico vira negrito e o título em maiúsculas volta ao normal. A fórmula e os ícones não mudam. |
 | **5. Por site** | **Desligar neste site** (embaixo) | Aquele site volta ao normal e os outros continuam com os ajustes. Clique de novo para religar. |
 | **5. Geral** | **Ajustes: LIGADOS/DESLIGADOS** (topo) | Liga e desliga tudo, em todos os sites. |
 | **5. Restaurar** | **Restaurar padrão** | Volta aos valores iniciais. A lista de sites desligados é mantida. |
@@ -117,6 +122,7 @@ fonts/                   OpenDyslexic (.woff2) + licença OFL
 shared/settings.js       valores padrão, esquemas de cor e funções de salvar/ler
 content/estilos.css      TODAS as regras visuais, "dormindo" até serem ligadas
 content/content.js       roda DENTRO de cada página: liga/desliga as regras
+content/regua.js         roda DENTRO da página: a régua de leitura
 content/tts.js           roda DENTRO da página: leitura em voz alta e destaque
 popup/popup.html|css|js  a janelinha com os botões
 demo/pagina-teste.html   página para demonstrar
@@ -169,6 +175,13 @@ fecha.
   Assim ele sabe exatamente qual pedaço da página destacar.
 - **Destaque sem mexer na página:** usa a *CSS Custom Highlight API*
   (`::highlight`), que pinta por cima do texto sem alterar o HTML do site.
+- **Régua de leitura:** é um único elemento preso à janela, com
+  `pointer-events: none` (os cliques passam por ele). O escurecimento em
+  volta é a sombra (`box-shadow`) gigante desse elemento.
+- **Apoios baseados em recomendações:** o guia de estilo da British
+  Dyslexia Association recomenda texto alinhado à esquerda (sem
+  justificar), linhas de 60 a 70 caracteres, e evitar itálico e texto todo
+  em maiúsculas, usando negrito para dar ênfase.
 - **Painel fixado:** o navegador sempre fecha o popup quando se clica fora
   dele. O alfinete abre a mesma página (`popup.html?painel=1`) na barra
   lateral: `sidebar_action` no Firefox e `side_panel` no Chrome. O manifest
@@ -182,7 +195,7 @@ fecha.
 
 - **Testes feitos até agora:** os testes automáticos rodaram no Chromium
   (estilos, CSP rígido, iframes, por site, abas do popup, painel fixado,
-  lógica da leitura com voz simulada) e o validador da Mozilla (`web-ext lint`) não aponta
+  régua e apoios, lógica da leitura com voz simulada) e o validador da Mozilla (`web-ext lint`) não aponta
   erros. **Falta o teste manual no Firefox e com voz de verdade.**
 - **Avisos ao carregar:** como o mesmo manifest serve aos dois navegadores,
   o Firefox avisa que não conhece a permissão `sidePanel`, e o Chrome avisa
@@ -207,6 +220,12 @@ fecha.
 - **Voz:** depende das vozes do sistema. Sem voz pt-BR instalada, a
   pronúncia fica errada (ver acima). No Linux a qualidade é baixa. No Chrome,
   algumas versões só deixam falar depois que a pessoa clica na página.
+- **Régua de leitura:** segue só o mouse (não funciona por teclado nem em
+  tela de toque) e some quando o mouse entra num iframe.
+- **Maiúsculas:** a opção só desfaz maiúsculas aplicadas pelo CSS do site.
+  Texto que já foi digitado em maiúsculas continua igual.
+- **Alinhar à esquerda:** vale para parágrafos e listas. Texto justificado
+  solto dentro de outros tipos de elemento pode continuar justificado.
 - **Divisão em frases:** abreviações com ponto ("Dr. Silva", "p. ex.") são
   tratadas como fim de frase, o que gera uma pausa a mais.
 - **Destaque da frase:** precisa do Firefox 140+ (ou Chrome 105+). Em
@@ -219,7 +238,7 @@ fecha.
 
 - Destacar palavra por palavra, e não só a frase.
 - Botões de "frase anterior" e "repetir frase", e atalhos de teclado.
-- Régua de leitura (faixa que segue o mouse e escurece o resto da tela).
+- Modo foco (esconder menus e anúncios) e pausar animações e GIFs.
 - Perfis salvos ("estudar", "ler notícias"…).
 - Aplicativo para celular e ajustes na fonte do sistema operacional.
 - Integração própria com o SIGAA (por exemplo, um botão dentro do sistema).
