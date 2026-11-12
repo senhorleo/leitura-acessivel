@@ -8,31 +8,31 @@
 <body>
   <h1>Leitura Acessível</h1>
 
-  <!-- Aviso para páginas onde extensões não podem atuar (about:, loja...). -->
-  <p id="aviso-pagina" class="aviso" role="status" hidden></p>
+  <!-- Avisos: página protegida, falta de permissão, aba antiga... -->
+  <div id="aviso" class="aviso" role="status" hidden>
+    <p id="aviso-texto"></p>
+    <button id="btn-permitir" hidden>Permitir em todos os sites</button>
+  </div>
 
-  <!-- Geral: chave principal e liga/desliga por site (item 5) ---------->
-  <section aria-labelledby="titulo-geral">
-    <h2 id="titulo-geral">Geral</h2>
-    <button id="btn-geral" class="toggle-grande" aria-pressed="true">
-      Ajustes: LIGADOS
-    </button>
-    <button id="btn-site" class="largo" aria-pressed="false" hidden>
-      Desligar neste site
-    </button>
-  </section>
+  <!-- Chave geral: liga/desliga todos os ajustes (item 5) --------------->
+  <button id="btn-geral" class="toggle-grande" aria-pressed="true">
+    Ajustes: LIGADOS
+  </button>
 
-  <!-- 1. Fonte -------------------------------------------------------->
-  <section aria-labelledby="titulo-fonte">
-    <h2 id="titulo-fonte">Fonte</h2>
+  <!-- Abas: dividem os controles em três telas curtas, para o popup
+       caber na janela sem precisar rolar. Padrão de acessibilidade
+       "tabs" (WAI-ARIA): setas ← → trocam de aba. -->
+  <div class="abas" role="tablist" aria-label="Grupos de ajustes">
+    <button role="tab" id="aba-texto" aria-controls="painel-texto" aria-selected="true">Texto</button>
+    <button role="tab" id="aba-cores" aria-controls="painel-cores" aria-selected="false" tabindex="-1">Cores</button>
+    <button role="tab" id="aba-voz" aria-controls="painel-voz" aria-selected="false" tabindex="-1">Voz</button>
+  </div>
+
+  <!-- Aba 1: fonte, tamanho e espaçamentos (itens 1 e 2) -------------->
+  <section id="painel-texto" role="tabpanel" aria-labelledby="aba-texto" tabindex="0">
     <button id="btn-fonte" class="toggle-grande" aria-pressed="true">
       OpenDyslexic: LIGADA
     </button>
-  </section>
-
-  <!-- 2. Tamanho e espaçamentos --------------------------------------->
-  <section aria-labelledby="titulo-espaco">
-    <h2 id="titulo-espaco">Tamanho e espaçamento</h2>
 
     <!-- Cada slider tem um <label> e um <output> que mostra o valor. -->
     <div class="slider">
@@ -59,15 +59,14 @@
       <input type="range" id="wordSpacing" min="0" max="0.6" step="0.04">
     </div>
 
-    <button id="btn-wcag" class="largo">Usar espaçamento recomendado (WCAG)</button>
+    <button id="btn-wcag" class="largo" title="Valores da norma de acessibilidade WCAG 2.1, critério 1.4.12">Espaçamento recomendado</button>
   </section>
 
-  <!-- 3. Cores -------------------------------------------------------->
-  <section aria-labelledby="titulo-cores">
-    <h2 id="titulo-cores">Cores</h2>
+  <!-- Aba 2: cores (item 3) ------------------------------------------->
+  <section id="painel-cores" role="tabpanel" aria-labelledby="aba-cores" tabindex="0" hidden>
     <!-- Os botões de cor são gerados pelo popup.js a partir de
          LA.COLOR_SCHEMES (shared/settings.js). -->
-    <div id="cores" class="grade-cores" role="group" aria-labelledby="titulo-cores"></div>
+    <div id="cores" class="grade-cores" role="group" aria-label="Cores de fundo e texto"></div>
 
     <div id="cores-personalizadas" class="cores-personalizadas" hidden>
       <label>Fundo <input type="color" id="customBg"></label>
@@ -75,17 +74,30 @@
     </div>
   </section>
 
-  <!-- 4. Leitura em voz alta ------------------------------------------>
-  <section aria-labelledby="titulo-voz">
-    <h2 id="titulo-voz">Leitura em voz alta</h2>
-
+  <!-- Aba 3: leitura em voz alta (item 4) ----------------------------->
+  <section id="painel-voz" role="tabpanel" aria-labelledby="aba-voz" tabindex="0" hidden>
+    <!-- Os ícones são desenhos SVG (não dependem de fonte) e têm
+         aria-hidden: o leitor de tela lê só o texto do botão. -->
     <div class="linha-botoes">
-      <button id="btn-ler-selecao">▶ Ler seleção</button>
-      <button id="btn-ler-pagina">▶ Ler página</button>
+      <button id="btn-ler-selecao">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+        Ler seleção
+      </button>
+      <button id="btn-ler-pagina">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+        Ler página
+      </button>
     </div>
     <div class="linha-botoes">
-      <button id="btn-pausar" disabled>⏸ Pausar</button>
-      <button id="btn-parar" disabled>⏹ Parar</button>
+      <button id="btn-pausar" disabled>
+        <svg class="ic-pausar" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+        <svg class="ic-continuar" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+        <span id="btn-pausar-texto">Pausar</span>
+      </button>
+      <button id="btn-parar" disabled>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v14H5z"/></svg>
+        Parar
+      </button>
     </div>
 
     <!-- aria-live: leitores de tela anunciam quando o texto muda. -->
@@ -104,8 +116,12 @@
     <p id="voz-aviso" class="dica" hidden></p>
   </section>
 
-  <!-- 5. Restaurar ---------------------------------------------------->
-  <button id="btn-restaurar" class="largo">↺ Restaurar padrão</button>
+  <!-- Rodapé: desligar só neste site e restaurar padrão (item 5) ------->
+  <p id="site-atual" class="dica" hidden></p>
+  <div class="linha-botoes rodape">
+    <button id="btn-site" aria-pressed="false" hidden>Desligar neste site</button>
+    <button id="btn-restaurar">Restaurar padrão</button>
+  </div>
 
   <script src="../shared/settings.js"></script>
   <script src="popup.js"></script>

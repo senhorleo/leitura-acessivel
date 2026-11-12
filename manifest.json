@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Leitura Acessível",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fonte OpenDyslexic, espaçamentos, cores e leitura em voz alta em qualquer página. Protótipo para pessoas com dislexia.",
 
   "icons": {
@@ -25,6 +25,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "css": ["content/estilos.css"],
       "js": ["shared/settings.js", "content/content.js", "content/tts.js"],
       "run_at": "document_start",
       "all_frames": true,

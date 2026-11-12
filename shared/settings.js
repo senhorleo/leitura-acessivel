@@ -89,7 +89,27 @@ LA.resetSettings = async function () {
   return LA.api.storage.local.set(structuredClone(rest));
 };
 
-/* Verifica se um domínio (ex.: "www.ufabc.edu.br") está desativado. */
-LA.isSiteDisabled = function (settings, hostname) {
-  return Boolean(hostname) && settings.disabledSites.includes(hostname);
+/* Nome usado para identificar um site na lista de desativados: o
+ * domínio (ex.: "www.ufabc.edu.br") ou, para arquivos abertos do
+ * computador (file://), o texto fixo "arquivos locais". Recebe um
+ * objeto URL ou o "location" da página. */
+LA.siteKey = function (url) {
+  if (url.protocol === "file:") return "arquivos locais";
+  if (url.protocol === "http:" || url.protocol === "https:") return url.hostname;
+  return "";
+};
+
+/* Seletor CSS dos elementos que usam fontes de ícones. A leitura em
+ * voz alta pula esses elementos (senão leria "menu", "search"...).
+ * É a mesma lista de content/estilos.css. */
+LA.ICONS = [
+  ".material-icons", '[class*="material-icons"]', '[class*="material-symbols"]',
+  ".fa", ".fas", ".far", ".fab", ".fal", ".fad", '[class^="fa-"]', '[class*=" fa-"]',
+  '[class*="glyphicon"]', '[class^="bi-"]', '[class*=" bi-"]',
+  '[class*="icon" i]', "[data-icon]",
+].join(", ");
+
+/* Verifica se um site está na lista de desativados. */
+LA.isSiteDisabled = function (settings, site) {
+  return Boolean(site) && settings.disabledSites.includes(site);
 };

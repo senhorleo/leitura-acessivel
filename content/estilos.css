@@ -1,0 +1,163 @@
+/*
+ * content/estilos.css
+ * ------------------------------------------------------------------
+ * Folha de estilo que o navegador injeta em TODAS as páginas (está
+ * declarada em "content_scripts.css" no manifest).
+ *
+ * IDEIA CENTRAL: este arquivo é fixo e, sozinho, não muda nada. Cada
+ * regra só "liga" quando o <html> da página tem um atributo data-la-*,
+ * e os valores vêm de variáveis CSS (--la-*). Quem coloca os atributos
+ * e as variáveis é o content/content.js, de acordo com o popup:
+ *
+ *   <html data-la-ativo data-la-fonte style="--la-linha: 1.5">
+ *
+ * Por que um arquivo fixo em vez de criar uma <style> por JavaScript?
+ * Sites com política de segurança rígida (CSP) bloqueiam estilos e
+ * fontes "de fora". Folhas declaradas no manifest são carregadas pelo
+ * próprio navegador e não passam por esse bloqueio.
+ */
+
+/* ------------------------------------------------------------------
+ * A fonte. Cada navegador usa um endereço diferente para os arquivos
+ * da extensão, então listamos os dois: o navegador tenta em ordem e
+ * fica com o primeiro que carregar. "__MSG_@@extension_id__" é trocado
+ * automaticamente pelo identificador da extensão.
+ * ------------------------------------------------------------------ */
+@font-face {
+  font-family: "OpenDyslexic LA";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/OpenDyslexic-Regular.woff2") format("woff2"),
+       url("moz-extension://__MSG_@@extension_id__/fonts/OpenDyslexic-Regular.woff2") format("woff2"),
+       url("../fonts/OpenDyslexic-Regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "OpenDyslexic LA";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/OpenDyslexic-Bold.woff2") format("woff2"),
+       url("moz-extension://__MSG_@@extension_id__/fonts/OpenDyslexic-Bold.woff2") format("woff2"),
+       url("../fonts/OpenDyslexic-Bold.woff2") format("woff2");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "OpenDyslexic LA";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/OpenDyslexic-Italic.woff2") format("woff2"),
+       url("moz-extension://__MSG_@@extension_id__/fonts/OpenDyslexic-Italic.woff2") format("woff2"),
+       url("../fonts/OpenDyslexic-Italic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "OpenDyslexic LA";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/OpenDyslexic-BoldItalic.woff2") format("woff2"),
+       url("moz-extension://__MSG_@@extension_id__/fonts/OpenDyslexic-BoldItalic.woff2") format("woff2"),
+       url("../fonts/OpenDyslexic-BoldItalic.woff2") format("woff2");
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ------------------------------------------------------------------
+ * @layer: muitos sites usam "!important" com seletores bem específicos.
+ * Pela regra de cascata do CSS, uma declaração "!important" dentro de
+ * uma camada (layer) vence as "!important" comuns do site, não importa
+ * a especificidade. É isso que garante que os ajustes "peguem".
+ * ------------------------------------------------------------------ */
+@layer leitura-acessivel {
+
+  /* === Itens 1 e 2: fonte e espaçamentos ===========================
+   * Valem para todos os elementos MENOS os da lista abaixo:
+   *
+   *  - Fontes de ícones (Material Icons, Font Awesome, Bootstrap...).
+   *    Elas desenham cada ícone como uma "letra" especial; trocar a
+   *    fonte faria o ícone virar a palavra "menu" ou um quadradinho.
+   *  - Código-fonte (precisa de fonte de largura fixa) e fórmulas
+   *    matemáticas (MathML, MathJax, KaTeX).
+   *
+   * (A lista de ícones se repete mais abaixo e em shared/settings.js;
+   * ao mudar uma, mude as outras.)
+   *
+   * O "&" é o aninhamento do CSS: "html[data-la-fonte] &" significa
+   * "estes elementos, quando o <html> tiver o atributo data-la-fonte". */
+  :not(
+    .material-icons, [class*="material-icons"], [class*="material-symbols"],
+    .fa, .fas, .far, .fab, .fal, .fad, [class^="fa-"], [class*=" fa-"],
+    [class*="glyphicon"], [class^="bi-"], [class*=" bi-"],
+    [class*="icon" i], [data-icon],
+    code, code *, pre, pre *, kbd, samp, math, math *,
+    mjx-container, mjx-container *, .MathJax, .MathJax *, .katex, .katex *
+  ) {
+    html[data-la-fonte] & {
+      font-family: "OpenDyslexic LA", sans-serif !important;
+    }
+    html[data-la-ativo] body & {
+      line-height: var(--la-linha) !important;
+    }
+    html[data-la-letras] body & {
+      letter-spacing: var(--la-letras) !important;
+    }
+    html[data-la-palavras] body & {
+      word-spacing: var(--la-palavras) !important;
+    }
+  }
+
+  /* Ícones herdariam o espaçamento do elemento pai, e espaçamento
+   * entre letras desliga as "ligaduras" que o Material Icons usa para
+   * transformar a palavra "menu" no desenho do ícone. */
+  html:is([data-la-letras], [data-la-palavras]) :is(
+    .material-icons, [class*="material-icons"], [class*="material-symbols"],
+    .fa, .fas, .far, .fab, .fal, .fad, [class^="fa-"], [class*=" fa-"],
+    [class*="glyphicon"], [class^="bi-"], [class*=" bi-"],
+    [class*="icon" i], [data-icon]
+  ) {
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+  }
+
+  /* === Item 2: tamanho do texto ====================================
+   * "zoom" amplia só os blocos de texto (parágrafos, itens de lista,
+   * títulos, células...). Diferente do Ctrl + "+", imagens e menus
+   * não crescem. O ":not(... *)" evita ampliar duas vezes um bloco
+   * que está dentro de outro (ex.: um <p> dentro de um <li>). */
+  html[data-la-zoom] :is(
+    p, li, dt, dd, blockquote, figcaption, td, th, caption, label,
+    summary, legend, h1, h2, h3, h4, h5, h6, div:not(:has(*))
+  ):not(:is(
+    p, li, dt, dd, blockquote, figcaption, td, th, caption, label,
+    summary, legend, h1, h2, h3, h4, h5, h6
+  ) *) {
+    zoom: var(--la-zoom) !important;
+  }
+
+  /* === Item 3: cores ===============================================
+   * Pinta o fundo e o texto de todos os elementos, menos mídias
+   * (imagens, vídeos, gráficos), para não esconder conteúdo visual. */
+  html[data-la-cores],
+  html[data-la-cores] body,
+  html[data-la-cores] body *:not(img, picture, video, canvas, svg, svg *, iframe, embed, object) {
+    background-color: var(--la-fundo) !important;
+    color: var(--la-texto) !important;
+    border-color: color-mix(in srgb, var(--la-texto) 35%, transparent) !important;
+  }
+  /* Links: cor própria e sempre sublinhados (não depender só da cor).
+   * O ":root" aumenta a especificidade para vencer a regra de cima. */
+  html[data-la-cores]:root a,
+  html[data-la-cores]:root a * {
+    color: var(--la-link) !important;
+  }
+  html[data-la-cores]:root a {
+    text-decoration: underline !important;
+  }
+}
+
+/* === Item 4: destaque da frase que está sendo lida ==================
+ * O content/tts.js registra o trecho atual com o nome "la-leitura"
+ * (CSS Custom Highlight API). É uma pintura por cima do texto: não
+ * altera o HTML da página, então não quebra nenhum site. */
+::highlight(la-leitura) {
+  background-color: #ffe066;
+  color: #111111;
+}

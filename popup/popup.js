@@ -17,32 +17,48 @@
   let settings = await LA.loadSettings();
 
   /* ================================================================
-   * Aba atual: precisamos do domínio (para "desligar neste site") e
-   * do id da aba (para mandar os comandos de voz).
+   * Avisos no topo do popup
+   * ================================================================ */
+  function showWarning(text, { askPermission = false } = {}) {
+    $("aviso-texto").textContent = text;
+    $("btn-permitir").hidden = !askPermission;
+    $("aviso").hidden = !text;
+  }
+
+  /* ================================================================
+   * Aba atual do navegador: precisamos do site (para "desligar neste
+   * site") e do id da aba (para mandar os comandos de voz).
    * ================================================================ */
   const [tab] = await api.tabs.query({ active: true, currentWindow: true });
-  let hostname = "";
+  let site = "";
   try {
-    const url = new URL(tab.url);
-    if (["http:", "https:", "file:"].includes(url.protocol)) {
-      hostname = url.hostname || "arquivos locais";
-    }
+    site = LA.siteKey(new URL(tab.url));
   } catch {
     /* tab.url indisponível */
   }
 
-  function showWarning(text) {
-    const el = $("aviso-pagina");
-    el.textContent = text;
-    el.hidden = !text;
-  }
+  /* O Firefox deixa o usuário negar o acesso aos sites. Sem ele a
+   * extensão não consegue agir, então explicamos e oferecemos o botão. */
+  const ALL_SITES = { origins: ["<all_urls>"] };
+  const hasPermission = await api.permissions.contains(ALL_SITES).catch(() => true);
 
-  if (!hostname) {
+  if (!hasPermission) {
+    showWarning(
+      "A extensão ainda não tem permissão para mudar as páginas. " +
+        "Clique no botão abaixo e depois recarregue a página (F5).",
+      { askPermission: true }
+    );
+  } else if (!site) {
     showWarning(
       "O navegador não deixa extensões mudarem esta página (páginas internas " +
         "como about: ou a loja de extensões). Abra um site comum para testar."
     );
   }
+
+  $("btn-permitir").addEventListener("click", async () => {
+    const granted = await api.permissions.request(ALL_SITES).catch(() => false);
+    if (granted) showWarning("Permissão concedida. Recarregue a página (F5).");
+  });
 
   /* ================================================================
    * Salvar com "debounce": enquanto o slider é arrastado, esperamos
@@ -66,6 +82,41 @@
   window.addEventListener("pagehide", flush);
 
   /* ================================================================
+   * Abas do popup (Texto / Cores / Voz)
+   * Padrão "tabs" da WAI-ARIA: clique ou setas ← → trocam de aba; só a
+   * aba ativa entra na ordem do Tab. A última aba usada fica lembrada.
+   * ================================================================ */
+  const tabs = [...document.querySelectorAll('[role="tab"]')];
+
+  function selectTab(selected, { focus = false } = {}) {
+    for (const t of tabs) {
+      const on = t === selected;
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+      $(t.getAttribute("aria-controls")).hidden = !on;
+    }
+    if (focus) selected.focus();
+    try {
+      localStorage.setItem("aba", selected.id);
+    } catch { /* sem localStorage: só não lembra a aba */ }
+  }
+
+  tabs.forEach((t, i) => {
+    t.addEventListener("click", () => selectTab(t));
+    t.addEventListener("keydown", (e) => {
+      const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      selectTab(tabs[(i + step + tabs.length) % tabs.length], { focus: true });
+    });
+  });
+
+  try {
+    const last = $(localStorage.getItem("aba") || "");
+    if (tabs.includes(last)) selectTab(last);
+  } catch { /* começa na primeira aba */ }
+
+  /* ================================================================
    * Geral e por site (item 5)
    * ================================================================ */
   const btnGeral = $("btn-geral");
@@ -78,8 +129,8 @@
 
   btnSite.addEventListener("click", () => {
     const list = new Set(settings.disabledSites);
-    if (list.has(hostname)) list.delete(hostname);
-    else list.add(hostname);
+    if (list.has(site)) list.delete(site);
+    else list.add(site);
     save({ disabledSites: [...list] });
     render();
   });
@@ -88,12 +139,14 @@
     btnGeral.setAttribute("aria-pressed", String(settings.enabled));
     btnGeral.textContent = settings.enabled ? "Ajustes: LIGADOS" : "Ajustes: DESLIGADOS";
 
-    btnSite.hidden = !hostname;
-    const off = LA.isSiteDisabled(settings, hostname);
+    btnSite.hidden = !site;
+    $("site-atual").hidden = !site;
+    const off = LA.isSiteDisabled(settings, site);
     btnSite.setAttribute("aria-pressed", String(off));
-    btnSite.textContent = off
-      ? `Religar em ${hostname}`
-      : `Desligar só em ${hostname}`;
+    btnSite.textContent = off ? "Religar neste site" : "Desligar neste site";
+    $("site-atual").textContent = off
+      ? `Site atual: ${site} (ajustes desligados aqui)`
+      : `Site atual: ${site}`;
   }
 
   /* ================================================================
@@ -195,13 +248,13 @@
   const btnPausar = $("btn-pausar");
   const btnParar = $("btn-parar");
   const vozEstado = $("voz-estado");
+  let ttsState = "parado";
 
   /* Manda um comando para a página principal da aba (frameId 0). */
   async function ttsCommand(action) {
-    if (!hostname) return null;
+    if (!site || !hasPermission) return null;
     try {
-      const resp = await api.tabs.sendMessage(tab.id, { type: "tts", action }, { frameId: 0 });
-      return resp;
+      return await api.tabs.sendMessage(tab.id, { type: "tts", action }, { frameId: 0 });
     } catch {
       // Acontece em abas abertas ANTES de instalar a extensão.
       showWarning("Recarregue a página (F5) para a extensão funcionar nesta aba.");
@@ -211,15 +264,17 @@
 
   function renderVoz(st) {
     if (!st) return;
+    ttsState = st.state;
     const lendo = st.state === "lendo";
     const pausado = st.state === "pausado";
     btnPausar.disabled = !(lendo || pausado);
     btnParar.disabled = !(lendo || pausado);
-    btnPausar.textContent = pausado ? "▶ Continuar" : "⏸ Pausar";
+    btnPausar.toggleAttribute("data-pausado", pausado);
+    $("btn-pausar-texto").textContent = pausado ? "Continuar" : "Pausar";
 
     if (st.error) vozEstado.textContent = `Erro na fala: ${st.error}`;
-    else if (lendo) vozEstado.textContent = `Lendo… trecho ${st.current} de ${st.total}`;
-    else if (pausado) vozEstado.textContent = `Pausado no trecho ${st.current} de ${st.total}`;
+    else if (lendo) vozEstado.textContent = `Lendo… frase ${st.current} de ${st.total}`;
+    else if (pausado) vozEstado.textContent = `Pausado na frase ${st.current} de ${st.total}`;
     else vozEstado.textContent = "Parado.";
   }
 
@@ -242,15 +297,14 @@
   });
 
   btnPausar.addEventListener("click", async () => {
-    const pausado = btnPausar.textContent.includes("Continuar");
-    renderVoz(await ttsCommand(pausado ? "continuar" : "pausar"));
+    renderVoz(await ttsCommand(ttsState === "pausado" ? "continuar" : "pausar"));
   });
 
   btnParar.addEventListener("click", async () => {
     renderVoz(await ttsCommand("parar"));
   });
 
-  // A página avisa quando muda de trecho ou termina.
+  // A página avisa quando muda de frase ou termina.
   api.runtime.onMessage.addListener((msg, sender) => {
     if (msg?.type === "tts-estado" && sender.tab?.id === tab.id) renderVoz(msg);
   });

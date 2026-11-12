@@ -11,10 +11,10 @@ dislexia**.
 
 | # | Funcionalidade | Como |
 |---|----------------|------|
-| 1 | Fonte **OpenDyslexic** em todas as páginas, inclusive em iframes | CSS injetado por um *content script* |
+| 1 | Fonte **OpenDyslexic** em todas as páginas, inclusive em iframes | folha de estilo da extensão |
 | 2 | Sliders de **tamanho do texto, espaço entre linhas, letras e palavras** | aplicados em tempo real |
 | 3 | **Cores de fundo e texto**: creme, bege, azul claro, cinza escuro ou personalizada | |
-| 4 | **Leitura em voz alta** da seleção ou da página, com play/pausa/parar e velocidade | Web Speech API, voz pt-BR |
+| 4 | **Leitura em voz alta** da seleção ou da página, com play/pausa/parar e velocidade. A **frase que está sendo lida fica destacada** em amarelo e a página rola sozinha | Web Speech API, voz pt-BR |
 | 5 | **Restaurar padrão** e **desligar só em um site** | |
 
 As configurações ficam salvas (`storage.local`) e valem para todas as abas,
@@ -23,6 +23,9 @@ inclusive depois de fechar o navegador.
 ---
 
 ## Instalação no Firefox (modo de teste)
+
+Precisa do **Firefox 128 ou mais novo** (o destaque da frase lida precisa do
+140 ou mais novo).
 
 1. Baixe o projeto: botão verde **Code → Download ZIP** no GitHub e
    descompacte. Outra opção é usar `git clone`.
@@ -38,9 +41,10 @@ inclusive depois de fechar o navegador.
 > ⚠️ Uma extensão **temporária some quando o Firefox fecha**. Antes de cada
 > teste ou apresentação, repita os passos 2 a 5.
 
-**Se a fonte não mudar em nenhum site:** abra `about:addons`, clique em
-**Leitura Acessível → Permissões** e ative **"Acessar seus dados em todos
-os sites"**.
+**Se a fonte não mudar em nenhum site:** abra o popup. Se aparecer o aviso
+amarelo de permissão, clique em **Permitir em todos os sites** e recarregue
+a página. Também dá para fazer por `about:addons` → **Leitura Acessível →
+Permissões**.
 
 ### No Chrome / Edge
 
@@ -53,24 +57,39 @@ compactação** → escolha a pasta do projeto.
 
 Use a página **`demo/pagina-teste.html`**: arraste o arquivo para o Firefox.
 Ela funciona sem internet e foi feita para a apresentação. Também vale
-testar em sites reais, como Wikipédia, G1, o site da UFABC ou o Google.
+testar em sites reais, como Wikipédia, G1, o site da UFABC, o SIGAA ou o
+GitHub.
+
+O popup tem o botão geral no topo, três abas (**Texto**, **Cores**, **Voz**)
+e, embaixo, os botões do site atual e de restaurar.
 
 | Funcionalidade | Passo a passo | O que deve acontecer |
 |---|---|---|
-| **1. Fonte** | Clique em **OpenDyslexic: LIGADA/DESLIGADA** | O texto muda na hora, inclusive o parágrafo de CSS "teimoso" e o iframe. O ícone "menu", o código e a fórmula **não** mudam. |
+| **1. Fonte** | Aba **Texto** → **OpenDyslexic: LIGADA/DESLIGADA** | O texto muda na hora, inclusive o parágrafo de CSS "teimoso" e o iframe. O ícone "menu", o código e a fórmula **não** mudam. |
 | **1. Ícones** | Abra um site com ícones (ex.: Gmail, GitHub, YouTube) | Os ícones continuam desenhos, sem virar palavras como "menu" ou "search". |
-| **2. Sliders** | Arraste cada slider | A página muda enquanto você arrasta. "Espaço entre letras/palavras" no 0 = "original" (o do site). |
-| **2. WCAG** | Clique em **Usar espaçamento recomendado (WCAG)** | Linhas 1,5, letras +0,12 e palavras +0,16 (critério 1.4.12 da WCAG 2.1). |
-| **3. Cores** | Clique em Creme, Bege, Azul claro ou Cinza escuro | Fundo e texto mudam. Os links ficam sublinhados e numa cor própria. Imagens não mudam. |
-| **3. Personalizado** | Clique em **Personalizado** e escolha as cores | Aparecem dois seletores (fundo e texto). |
-| **4. Ler seleção** | Selecione um trecho com o mouse → **▶ Ler seleção** | Lê só o trecho. O popup mostra "Lendo… trecho X de Y". |
-| **4. Ler página** | **▶ Ler página** | Lê o conteúdo principal (`<article>`/`<main>`, ou a página toda). |
-| **4. Pausa/Parar** | **⏸ Pausar** → **▶ Continuar** → **⏹ Parar** | A fala pausa, continua de onde parou e para. A leitura **continua mesmo com o popup fechado**. |
+| **1. Site com segurança rígida** | Abra o GitHub | A fonte muda normalmente (o GitHub bloqueia fontes e estilos "de fora", mas não os da extensão). |
+| **2. Sliders** | Aba **Texto** → arraste cada slider | A página muda enquanto você arrasta. "Espaço entre letras/palavras" no 0 = "original" (o do site). |
+| **2. WCAG** | **Espaçamento recomendado** | Linhas 1,5, letras +0,12 e palavras +0,16 (critério 1.4.12 da WCAG 2.1). |
+| **3. Cores** | Aba **Cores** → Creme, Bege, Azul claro ou Cinza escuro | Fundo e texto mudam. Os links ficam sublinhados e numa cor própria. Imagens não mudam. |
+| **3. Personalizado** | **Personalizado** e escolha as cores | Aparecem dois seletores (fundo e texto). |
+| **4. Ler seleção** | Selecione um trecho com o mouse → aba **Voz** → **Ler seleção** | Lê só o trecho. O popup mostra "Lendo… frase X de Y". |
+| **4. Ler página** | **Ler página** | Lê o conteúdo principal, pulando menus, rodapé, ícones e texto escondido. |
+| **4. Destaque** | Observe a página durante a leitura | A frase falada fica com fundo amarelo e a página rola para acompanhá-la. |
+| **4. Pausa/Parar** | **Pausar** → **Continuar** → **Parar** | A fala pausa, continua de onde parou e para. A leitura **continua mesmo com o popup fechado**. |
 | **4. Velocidade** | Mexa em **Velocidade** durante a leitura | A nova velocidade vale a partir da próxima frase. |
-| **5. Por site** | Clique em **Desligar só em (site)** | Aquele site volta ao normal e os outros continuam com os ajustes. Clique de novo para religar. |
-| **5. Geral** | **Ajustes: LIGADOS/DESLIGADOS** | Liga e desliga tudo, em todos os sites. |
-| **5. Restaurar** | **↺ Restaurar padrão** | Volta aos valores iniciais. A lista de sites desligados é mantida. |
+| **5. Por site** | **Desligar neste site** (embaixo) | Aquele site volta ao normal e os outros continuam com os ajustes. Clique de novo para religar. |
+| **5. Geral** | **Ajustes: LIGADOS/DESLIGADOS** (topo) | Liga e desliga tudo, em todos os sites. |
+| **5. Restaurar** | **Restaurar padrão** | Volta aos valores iniciais. A lista de sites desligados é mantida. |
+| Teclado | Tab percorre os controles; setas ← → trocam de aba | Dá para usar o popup inteiro sem mouse. |
 | Persistência | Mude algo, feche e reabra o Firefox (e recarregue a extensão) | As configurações continuam lá. |
+
+### SIGAA da UFABC
+
+Testado na **tela de login** (`sig.ufabc.edu.br/sigaa/verTelaLogin.do`):
+todos os textos recebem a fonte, os ajustes e as cores, sem barra de rolagem
+horizontal. As telas de dentro do sistema (depois do login) usam o mesmo
+tipo de página, mas **ainda não foram testadas**: vale conferir os menus e
+as tabelas de notas com tamanho de texto grande.
 
 ### Voz em português (pt-BR)
 
@@ -91,11 +110,12 @@ Se houver mais de uma voz em português, dá para escolher no campo **Voz**.
 ## Como funciona (para a apresentação)
 
 ```
-manifest.json            "RG" da extensão: nome, permissões, quais scripts rodam onde
+manifest.json            "RG" da extensão: nome, permissões, quais arquivos entram nas páginas
 fonts/                   OpenDyslexic (.woff2) + licença OFL
 shared/settings.js       valores padrão, esquemas de cor e funções de salvar/ler
-content/content.js       roda DENTRO de cada página: monta o CSS e aplica
-content/tts.js           roda DENTRO da página: leitura em voz alta
+content/estilos.css      TODAS as regras visuais, "dormindo" até serem ligadas
+content/content.js       roda DENTRO de cada página: liga/desliga as regras
+content/tts.js           roda DENTRO da página: leitura em voz alta e destaque
 popup/popup.html|css|js  a janelinha com os botões
 demo/pagina-teste.html   página para demonstrar
 ```
@@ -103,19 +123,25 @@ demo/pagina-teste.html   página para demonstrar
 **Fluxo dos ajustes visuais:**
 
 ```
- Popup  ──salva──▶  storage.local  ──evento onChanged──▶  content.js (em cada aba e iframe)
-                                                         └─▶ reescreve a <style> da página
+ Popup ──salva──▶ storage.local ──evento onChanged──▶ content.js (em cada aba e iframe)
+                                                      └─▶ <html data-la-fonte style="--la-linha: 1.5">
+                                                           └─▶ as regras de estilos.css passam a valer
 ```
 
 O popup não "conversa" com a página. Ele só salva a configuração, e cada
 página percebe a mudança sozinha. Por isso todas as abas abertas mudam
 juntas.
 
+O arquivo `estilos.css` é fixo. Cada regra só vale quando o `<html>` da
+página tem o atributo certo (`data-la-fonte`, `data-la-cores`…), e os
+valores vêm de variáveis CSS (`--la-linha`, `--la-fundo`…). O `content.js`
+só coloca e tira esses atributos e variáveis.
+
 **Fluxo da voz:**
 
 ```
  Popup ──mensagem "ler-pagina"──▶ tts.js (página) ──▶ speechSynthesis (voz do sistema)
-       ◀──mensagem "tts-estado"──  (trecho X de Y)
+       ◀──mensagem "tts-estado"──  (frase X de Y)   └─▶ destaca a frase na página
 ```
 
 A fala roda na página, e não no popup, porque o popup é destruído quando
@@ -123,23 +149,35 @@ fecha.
 
 **Detalhes técnicos que valem uma menção:**
 
+- **Por que um CSS fixo no manifest:** sites com política de segurança
+  rígida (CSP) bloqueiam estilos e fontes inseridos por script. Folhas
+  declaradas no manifest são carregadas pelo próprio navegador e não passam
+  por esse bloqueio.
 - **`@layer` + `!important`:** muitos sites usam `!important` com seletores
-  específicos. Pela regra de cascata do CSS, entre declarações
-  `!important`, a camada (`@layer`) declarada primeiro vence. Como o script
-  roda em `document_start`, a nossa é sempre a primeira.
+  específicos. Pela regra de cascata do CSS, uma declaração `!important`
+  dentro de uma camada (`@layer`) vence as `!important` comuns do site.
 - **Ícones preservados:** o CSS usa `:not(...)` com os padrões do Material
   Icons, Font Awesome, Bootstrap Icons etc., além de `code`, `pre`,
-  MathJax e KaTeX.
+  MathML, MathJax e KaTeX.
 - **Tamanho do texto:** usa `zoom` só nos blocos de texto (parágrafos,
   listas, títulos, tabelas). Diferente do Ctrl + "+", imagens e menus não
   são ampliados.
-- **Texto em trechos:** a fala é dividida em frases de até ~200
-  caracteres, porque falas longas travam em alguns navegadores.
+- **Leitura em frases:** o `tts.js` percorre o texto visível da página,
+  anota de onde veio cada trecho, divide em frases e fala uma por vez.
+  Assim ele sabe exatamente qual pedaço da página destacar.
+- **Destaque sem mexer na página:** usa a *CSS Custom Highlight API*
+  (`::highlight`), que pinta por cima do texto sem alterar o HTML do site.
+- **Popup acessível:** botões de 44 px ou mais, abas no padrão WAI-ARIA
+  (setas do teclado), foco sempre visível, estado nunca indicado só por cor.
 
 ---
 
 ## Limitações conhecidas
 
+- **Testes feitos até agora:** os testes automáticos rodaram no Chromium
+  (estilos, CSP rígido, iframes, por site, abas do popup, lógica da leitura
+  com voz simulada) e o validador da Mozilla (`web-ext lint`) passa sem
+  avisos. **Falta o teste manual no Firefox e com voz de verdade.**
 - **Extensão temporária:** no Firefox comum ela some ao fechar o navegador.
   Para uso permanente, é preciso assinar a extensão no addons.mozilla.org,
   mesmo sem publicá-la.
@@ -159,19 +197,22 @@ fecha.
 - **Voz:** depende das vozes do sistema. Sem voz pt-BR instalada, a
   pronúncia fica errada (ver acima). No Linux a qualidade é baixa. No Chrome,
   algumas versões só deixam falar depois que a pessoa clica na página.
-- **Leitura da página:** quando o site não usa `<article>`/`<main>`, a
-  extensão lê a página inteira, incluindo menus e rodapé.
+- **Divisão em frases:** abreviações com ponto ("Dr. Silva", "p. ex.") são
+  tratadas como fim de frase, o que gera uma pausa a mais.
+- **Destaque da frase:** precisa do Firefox 140+ (ou Chrome 105+). Em
+  versões mais antigas a leitura funciona, só sem o destaque.
 - **Seleção dentro de iframes** não é lida: só a página principal fala.
 - **Iframes de outros sites:** o "desligar neste site" usa o domínio da
   página principal sempre que o navegador permite descobrir.
 
 ## Ideias futuras (fora do escopo deste protótipo)
 
-- Destacar a frase ou palavra sendo lida (acompanhar a leitura com os olhos).
+- Destacar palavra por palavra, e não só a frase.
+- Botões de "frase anterior" e "repetir frase", e atalhos de teclado.
 - Régua de leitura (faixa que segue o mouse e escurece o resto da tela).
-- Perfis salvos ("estudar", "ler notícias"…) e atalhos de teclado.
+- Perfis salvos ("estudar", "ler notícias"…).
 - Aplicativo para celular e ajustes na fonte do sistema operacional.
-- Integração com o SIGAA e outros sistemas da UFABC.
+- Integração própria com o SIGAA (por exemplo, um botão dentro do sistema).
 - Testes com usuários: medir tempo de leitura e conforto com e sem a extensão.
 
 ## Licenças
