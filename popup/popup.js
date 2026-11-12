@@ -28,32 +28,43 @@
   /* ================================================================
    * Aba atual do navegador: precisamos do site (para "desligar neste
    * site") e do id da aba (para mandar os comandos de voz).
+   * No popup isso é lido uma vez. No painel fixado, a pessoa troca de
+   * aba e de página com o painel aberto, então é relido a cada troca
+   * (ver "Painel fixado", mais abaixo).
    * ================================================================ */
-  const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+  let tab = null;
   let site = "";
-  try {
-    site = LA.siteKey(new URL(tab.url));
-  } catch {
-    /* tab.url indisponível */
-  }
 
   /* O Firefox deixa o usuário negar o acesso aos sites. Sem ele a
    * extensão não consegue agir, então explicamos e oferecemos o botão. */
   const ALL_SITES = { origins: ["<all_urls>"] };
   const hasPermission = await api.permissions.contains(ALL_SITES).catch(() => true);
 
-  if (!hasPermission) {
-    showWarning(
-      "A extensão ainda não tem permissão para mudar as páginas. " +
-        "Clique no botão abaixo e depois recarregue a página (F5).",
-      { askPermission: true }
-    );
-  } else if (!site) {
-    showWarning(
-      "O navegador não deixa extensões mudarem esta página (páginas internas " +
-        "como about: ou a loja de extensões). Abra um site comum para testar."
-    );
+  async function readCurrentTab() {
+    [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    site = "";
+    try {
+      site = LA.siteKey(new URL(tab.url));
+    } catch {
+      /* tab.url indisponível */
+    }
+
+    if (!hasPermission) {
+      showWarning(
+        "A extensão ainda não tem permissão para mudar as páginas. " +
+          "Clique no botão abaixo e depois recarregue a página (F5).",
+        { askPermission: true }
+      );
+    } else if (!site) {
+      showWarning(
+        "O navegador não deixa extensões mudarem esta página (páginas internas " +
+          "como about: ou a loja de extensões). Abra um site comum para testar."
+      );
+    } else {
+      showWarning("");
+    }
   }
+  await readCurrentTab();
 
   $("btn-permitir").addEventListener("click", async () => {
     const granted = await api.permissions.request(ALL_SITES).catch(() => false);
@@ -67,7 +78,9 @@
    * ================================================================ */
   let pending = {};
   let timer = null;
+  let lastSave = 0;
   function save(partial) {
+    lastSave = Date.now();
     Object.assign(settings, partial);
     Object.assign(pending, partial);
     clearTimeout(timer);
@@ -252,7 +265,7 @@
 
   /* Manda um comando para a página principal da aba (frameId 0). */
   async function ttsCommand(action) {
-    if (!site || !hasPermission) return null;
+    if (!tab || !site || !hasPermission) return null;
     try {
       return await api.tabs.sendMessage(tab.id, { type: "tts", action }, { frameId: 0 });
     } catch {
@@ -306,7 +319,7 @@
 
   // A página avisa quando muda de frase ou termina.
   api.runtime.onMessage.addListener((msg, sender) => {
-    if (msg?.type === "tts-estado" && sender.tab?.id === tab.id) renderVoz(msg);
+    if (msg?.type === "tts-estado" && sender.tab?.id === tab?.id) renderVoz(msg);
   });
 
   /* Lista de vozes em português instaladas no sistema. */
@@ -325,8 +338,7 @@
     const aviso = $("voz-aviso");
     aviso.hidden = voices.length > 0;
     aviso.textContent =
-      "Nenhuma voz em português foi encontrada no sistema. A leitura vai usar a " +
-      "voz padrão. Veja no README como instalar uma voz pt-BR.";
+      "Nenhuma voz em português instalada no sistema. Veja o README.";
   }
 
   $("ttsVoice").addEventListener("change", (e) => save({ ttsVoice: e.target.value }));
@@ -345,6 +357,66 @@
     settings = await LA.loadSettings();
     render();
     loadVoices();
+  });
+
+  /* ================================================================
+   * Painel fixado (o "alfinete")
+   * O popup comum fecha sempre que a pessoa clica fora dele; é uma
+   * regra do navegador. Para deixar os controles sempre à mão, o
+   * alfinete abre esta MESMA página na barra lateral do navegador:
+   *   - Firefox: "sidebar_action" (API sidebarAction);
+   *   - Chrome/Edge: "side_panel" (API sidePanel).
+   * O manifest abre a página com "?painel=1" no endereço, e é assim
+   * que sabemos em qual dos dois modos estamos.
+   * ================================================================ */
+  const isPanel = new URLSearchParams(location.search).has("painel");
+  const btnFixar = $("btn-fixar");
+  document.documentElement.classList.toggle("painel", isPanel);
+
+  btnFixar.hidden = !(api.sidebarAction || api.sidePanel);
+  $("btn-fixar-texto").textContent = isPanel ? "Desafixar" : "Fixar";
+  btnFixar.title = isPanel
+    ? "Fechar o painel lateral"
+    : "Manter este painel aberto ao lado da página";
+
+  btnFixar.addEventListener("click", () => {
+    if (isPanel) {
+      // Desafixar = fechar a barra lateral.
+      if (api.sidebarAction) api.sidebarAction.close();
+      else window.close();
+      return;
+    }
+    // Importante: abrir SEM "await" antes. O navegador só deixa abrir a
+    // barra lateral como resposta direta a um clique do usuário.
+    const opening = api.sidebarAction
+      ? api.sidebarAction.open()
+      : api.sidePanel.open({ windowId: tab.windowId });
+    Promise.resolve(opening)
+      .then(() => window.close()) // fecha o popup; o painel assume
+      .catch(() => showWarning("Não consegui abrir o painel lateral neste navegador."));
+  });
+
+  if (isPanel) {
+    // A pessoa trocou de aba ou a página mudou: relê o site atual e o
+    // estado da leitura em voz alta.
+    const onTabChange = async () => {
+      await readCurrentTab();
+      renderGeral();
+      renderVoz((await ttsCommand("estado")) || { state: "parado" });
+    };
+    api.tabs.onActivated.addListener(onTabChange);
+    api.tabs.onUpdated.addListener((tabId, change) => {
+      if (tabId === tab?.id && (change.url || change.status === "complete")) onTabChange();
+    });
+  }
+
+  /* Se as configurações mudarem por outro caminho (ex.: o popup aberto
+   * junto com o painel), atualiza os controles. Ignoramos o "eco" das
+   * nossas próprias gravações para o slider não pular durante o arraste. */
+  api.storage.onChanged.addListener(async (_changes, area) => {
+    if (area !== "local" || Date.now() - lastSave < 400) return;
+    settings = { ...(await LA.loadSettings()), ...pending };
+    render();
   });
 
   /* ================================================================ */

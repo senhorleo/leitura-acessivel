@@ -16,6 +16,7 @@ dislexia**.
 | 3 | **Cores de fundo e texto**: creme, bege, azul claro, cinza escuro ou personalizada | |
 | 4 | **Leitura em voz alta** da seleção ou da página, com play/pausa/parar e velocidade. A **frase que está sendo lida fica destacada** em amarelo e a página rola sozinha | Web Speech API, voz pt-BR |
 | 5 | **Restaurar padrão** e **desligar só em um site** | |
+| + | **Fixar o painel** (alfinete): os controles ficam abertos na barra lateral enquanto você navega | barra lateral do navegador |
 
 As configurações ficam salvas (`storage.local`) e valem para todas as abas,
 inclusive depois de fechar o navegador.
@@ -80,6 +81,7 @@ e, embaixo, os botões do site atual e de restaurar.
 | **5. Por site** | **Desligar neste site** (embaixo) | Aquele site volta ao normal e os outros continuam com os ajustes. Clique de novo para religar. |
 | **5. Geral** | **Ajustes: LIGADOS/DESLIGADOS** (topo) | Liga e desliga tudo, em todos os sites. |
 | **5. Restaurar** | **Restaurar padrão** | Volta aos valores iniciais. A lista de sites desligados é mantida. |
+| **Fixar (alfinete)** | Clique em **Fixar**, no topo do popup | O popup fecha e o mesmo painel abre na barra lateral, onde continua aberto ao clicar na página e ao trocar de aba ("Site atual" acompanha). **Desafixar** fecha a barra. |
 | Teclado | Tab percorre os controles; setas ← → trocam de aba | Dá para usar o popup inteiro sem mouse. |
 | Persistência | Mude algo, feche e reabra o Firefox (e recarregue a extensão) | As configurações continuam lá. |
 
@@ -167,6 +169,10 @@ fecha.
   Assim ele sabe exatamente qual pedaço da página destacar.
 - **Destaque sem mexer na página:** usa a *CSS Custom Highlight API*
   (`::highlight`), que pinta por cima do texto sem alterar o HTML do site.
+- **Painel fixado:** o navegador sempre fecha o popup quando se clica fora
+  dele. O alfinete abre a mesma página (`popup.html?painel=1`) na barra
+  lateral: `sidebar_action` no Firefox e `side_panel` no Chrome. O manifest
+  declara os dois, e cada navegador usa o seu.
 - **Popup acessível:** botões de 44 px ou mais, abas no padrão WAI-ARIA
   (setas do teclado), foco sempre visível, estado nunca indicado só por cor.
 
@@ -175,9 +181,13 @@ fecha.
 ## Limitações conhecidas
 
 - **Testes feitos até agora:** os testes automáticos rodaram no Chromium
-  (estilos, CSP rígido, iframes, por site, abas do popup, lógica da leitura
-  com voz simulada) e o validador da Mozilla (`web-ext lint`) passa sem
-  avisos. **Falta o teste manual no Firefox e com voz de verdade.**
+  (estilos, CSP rígido, iframes, por site, abas do popup, painel fixado,
+  lógica da leitura com voz simulada) e o validador da Mozilla (`web-ext lint`) não aponta
+  erros. **Falta o teste manual no Firefox e com voz de verdade.**
+- **Avisos ao carregar:** como o mesmo manifest serve aos dois navegadores,
+  o Firefox avisa que não conhece a permissão `sidePanel`, e o Chrome avisa
+  que não conhece `sidebar_action` e `browser_specific_settings`. São só
+  avisos; a extensão funciona normalmente.
 - **Extensão temporária:** no Firefox comum ela some ao fechar o navegador.
   Para uso permanente, é preciso assinar a extensão no addons.mozilla.org,
   mesmo sem publicá-la.

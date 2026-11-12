@@ -53,9 +53,30 @@ body {
   line-height: 1.5;
 }
 
+/* Topo: título à esquerda, alfinete ("Fixar") à direita. */
+.topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
 h1 {
   font-size: 17px;
-  margin: 0 0 6px;
+  margin: 0;
+}
+#btn-fixar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  font-size: 14px;
+}
+
+/* Painel fixado na barra lateral: ocupa a largura que o navegador der. */
+html.painel body {
+  width: auto;
+  max-width: 480px;
 }
 
 p {
