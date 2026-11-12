@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Leitura Acessível",
+  "version": "0.1.0",
+  "description": "Fonte OpenDyslexic, espaçamentos, cores e leitura em voz alta em qualquer página. Protótipo para pessoas com dislexia.",
+
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png",
+    "128": "icons/icon-128.png"
+  },
+
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+
+  "action": {
+    "default_title": "Leitura Acessível",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png"
+    }
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["shared/settings.js", "content/content.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": ["fonts/*.woff2"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "leitura-acessivel@exemplo.org",
+      "strict_min_version": "128.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
+}

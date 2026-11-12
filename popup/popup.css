@@ -1,0 +1,145 @@
+/*
+ * popup/popup.css
+ * ------------------------------------------------------------------
+ * Visual do popup. Princípios de acessibilidade usados:
+ *   - o próprio popup usa OpenDyslexic;
+ *   - botões grandes (mínimo de 44px de altura, recomendação WCAG);
+ *   - fundo creme em vez de branco puro (menos brilho/contraste
+ *     excessivo, recomendação da British Dyslexia Association);
+ *   - foco do teclado sempre visível (contorno grosso).
+ */
+
+@font-face {
+  font-family: "OpenDyslexic LA";
+  src: url("../fonts/OpenDyslexic-Regular.woff2") format("woff2");
+  font-weight: normal;
+}
+@font-face {
+  font-family: "OpenDyslexic LA";
+  src: url("../fonts/OpenDyslexic-Bold.woff2") format("woff2");
+  font-weight: bold;
+}
+
+:root {
+  --fundo: #fdf6e3;
+  --texto: #222222;
+  --suave: #5b5346;
+  --borda: #d8ccb0;
+  --cartao: #fffbf0;
+  --destaque: #1a5fb4;
+  --destaque-texto: #ffffff;
+  --ligado: #2e7d32;
+  --desligado: #8a8a8a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 360px;
+  padding: 12px;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: "OpenDyslexic LA", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+h2 {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+section {
+  background: var(--cartao);
+  border: 2px solid var(--borda);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+section[hidden] {
+  display: none;
+}
+
+/* Botões: grandes e com bastante área de clique. */
+button {
+  font: inherit;
+  min-height: 44px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 2px solid var(--texto);
+  background: var(--cartao);
+  color: var(--texto);
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f1e7cf;
+}
+
+:focus-visible {
+  outline: 3px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+/* Botão grande de ligar/desligar. A cor E o texto mudam: quem não
+ * distingue cores ainda lê "LIGADO" ou "DESLIGADO". */
+.toggle-grande {
+  width: 100%;
+  min-height: 56px;
+  font-size: 17px;
+  font-weight: bold;
+  color: #ffffff;
+  border-color: transparent;
+}
+.toggle-grande[aria-pressed="true"] {
+  background: var(--ligado);
+}
+.toggle-grande[aria-pressed="false"] {
+  background: var(--desligado);
+}
+
+.linha-botoes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.linha-botoes > button {
+  flex: 1 1 0;
+}
+
+/* Interruptor simples (checkbox) com rótulo grande. */
+.opcao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.opcao input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--destaque);
+}
+
+.dica {
+  color: var(--suave);
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+.aviso {
+  background: #fff3cd;
+  border: 2px solid #c9a227;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+}

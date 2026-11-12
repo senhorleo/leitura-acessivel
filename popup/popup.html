@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Leitura Acessível</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>Leitura Acessível</h1>
+
+  <!-- Aviso para páginas onde extensões não podem atuar (about:, loja...). -->
+  <p id="aviso-pagina" class="aviso" hidden></p>
+
+  <!-- 1. Fonte -------------------------------------------------------->
+  <section aria-labelledby="titulo-fonte">
+    <h2 id="titulo-fonte">Fonte</h2>
+    <button id="btn-fonte" class="toggle-grande" aria-pressed="true">
+      OpenDyslexic: LIGADA
+    </button>
+  </section>
+
+  <script src="../shared/settings.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
