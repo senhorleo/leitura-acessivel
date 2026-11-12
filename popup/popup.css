@@ -143,3 +143,97 @@ button:hover {
   padding: 8px;
   font-size: 13px;
 }
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.largo {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Botão "desligar neste site" quando o site está desligado. */
+#btn-site[aria-pressed="true"] {
+  background: #fde2e1;
+  border-color: #a51d2d;
+}
+
+.linha-botoes + .linha-botoes {
+  margin-top: 8px;
+}
+
+/* Sliders: rótulo à esquerda, valor à direita, barra embaixo. */
+.slider {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.slider output {
+  font-weight: bold;
+}
+.slider input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 28px;
+  accent-color: var(--destaque);
+}
+
+/* Botões de cor: mostram o próprio fundo/texto do esquema. */
+.grade-cores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.grade-cores button {
+  font-size: 14px;
+}
+.grade-cores button[aria-pressed="true"] {
+  outline: 3px solid var(--destaque);
+  outline-offset: 2px;
+  font-weight: bold;
+}
+.grade-cores button[aria-pressed="true"]::before {
+  content: "✓ ";
+}
+
+.cores-personalizadas {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+}
+.cores-personalizadas[hidden] {
+  display: none;
+}
+.cores-personalizadas label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+input[type="color"] {
+  width: 48px;
+  height: 36px;
+  border: 2px solid var(--texto);
+  border-radius: 6px;
+  padding: 0;
+}
+
+.campo {
+  display: block;
+  margin-top: 4px;
+}
+select {
+  font: inherit;
+  width: 100%;
+  min-height: 44px;
+  border: 2px solid var(--texto);
+  border-radius: 8px;
+  background: var(--cartao);
+  color: var(--texto);
+}
+
+[hidden] {
+  display: none !important;
+}

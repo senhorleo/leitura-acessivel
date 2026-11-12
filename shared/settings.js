@@ -25,8 +25,50 @@ LA.api = globalThis.browser ?? globalThis.chrome;
 LA.DEFAULTS = Object.freeze({
   enabled: true,     // chave geral: liga/desliga todos os ajustes
   useFont: true,     // usar a fonte OpenDyslexic
+
+  // Tamanho e espaçamentos (item 2)
+  fontSize: 100,      // % do tamanho original do texto (100 = sem mudança)
+  lineHeight: 1.5,    // altura da linha, em múltiplos do tamanho da fonte
+  letterSpacing: 0,   // espaço extra entre letras, em "em" (0 = original do site)
+  wordSpacing: 0,     // espaço extra entre palavras, em "em" (0 = original do site)
+
+  // Cores (item 3)
+  colorScheme: "nenhum", // "nenhum" | "creme" | "bege" | "azul" | "escuro" | "personalizado"
+  customBg: "#fdf6e3",
+  customFg: "#222222",
+
+  // Leitura em voz alta (item 4)
+  ttsRate: 1,         // velocidade da fala (1 = normal)
+  ttsVoice: "",       // nome da voz escolhida ("" = escolher pt-BR automaticamente)
+
   disabledSites: [], // lista de domínios onde a extensão fica desligada
 });
+
+/* Valores sugeridos pela WCAG 2.1 (critério 1.4.12 – Espaçamento de
+ * texto). Usados pelo botão "Espaçamento recomendado". */
+LA.WCAG_SPACING = Object.freeze({
+  lineHeight: 1.5,
+  letterSpacing: 0.12,
+  wordSpacing: 0.16,
+});
+
+/* Esquemas de cores prontos. "link" é a cor dos links, escolhida para
+ * manter bom contraste com o fundo. */
+LA.COLOR_SCHEMES = Object.freeze({
+  creme:  { label: "Creme",        bg: "#fdf6e3", fg: "#222222", link: "#1a5fb4" },
+  bege:   { label: "Bege",         bg: "#f3e4c4", fg: "#2b2b2b", link: "#0b4f9c" },
+  azul:   { label: "Azul claro",   bg: "#dcebf7", fg: "#1b1b1b", link: "#0b4f9c" },
+  escuro: { label: "Cinza escuro", bg: "#2b2b2b", fg: "#f0ead6", link: "#9cc3ff" },
+});
+
+/* Devolve { bg, fg, link } para as configurações atuais, ou null se o
+ * usuário não quer mudar as cores. */
+LA.resolveColors = function (s) {
+  if (s.colorScheme === "personalizado") {
+    return { bg: s.customBg, fg: s.customFg, link: s.customFg };
+  }
+  return LA.COLOR_SCHEMES[s.colorScheme] ?? null;
+};
 
 /* Lê as configurações salvas, completando com os padrões o que faltar. */
 LA.loadSettings = async function () {

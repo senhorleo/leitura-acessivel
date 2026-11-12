@@ -9,7 +9,18 @@
   <h1>Leitura Acessível</h1>
 
   <!-- Aviso para páginas onde extensões não podem atuar (about:, loja...). -->
-  <p id="aviso-pagina" class="aviso" hidden></p>
+  <p id="aviso-pagina" class="aviso" role="status" hidden></p>
+
+  <!-- Geral: chave principal e liga/desliga por site (item 5) ---------->
+  <section aria-labelledby="titulo-geral">
+    <h2 id="titulo-geral">Geral</h2>
+    <button id="btn-geral" class="toggle-grande" aria-pressed="true">
+      Ajustes: LIGADOS
+    </button>
+    <button id="btn-site" class="largo" aria-pressed="false" hidden>
+      Desligar neste site
+    </button>
+  </section>
 
   <!-- 1. Fonte -------------------------------------------------------->
   <section aria-labelledby="titulo-fonte">
@@ -18,6 +29,83 @@
       OpenDyslexic: LIGADA
     </button>
   </section>
+
+  <!-- 2. Tamanho e espaçamentos --------------------------------------->
+  <section aria-labelledby="titulo-espaco">
+    <h2 id="titulo-espaco">Tamanho e espaçamento</h2>
+
+    <!-- Cada slider tem um <label> e um <output> que mostra o valor. -->
+    <div class="slider">
+      <label for="fontSize">Tamanho do texto</label>
+      <output for="fontSize" id="fontSize-valor"></output>
+      <input type="range" id="fontSize" min="80" max="200" step="10">
+    </div>
+
+    <div class="slider">
+      <label for="lineHeight">Espaço entre linhas</label>
+      <output for="lineHeight" id="lineHeight-valor"></output>
+      <input type="range" id="lineHeight" min="1" max="3" step="0.1">
+    </div>
+
+    <div class="slider">
+      <label for="letterSpacing">Espaço entre letras</label>
+      <output for="letterSpacing" id="letterSpacing-valor"></output>
+      <input type="range" id="letterSpacing" min="0" max="0.3" step="0.02">
+    </div>
+
+    <div class="slider">
+      <label for="wordSpacing">Espaço entre palavras</label>
+      <output for="wordSpacing" id="wordSpacing-valor"></output>
+      <input type="range" id="wordSpacing" min="0" max="0.6" step="0.04">
+    </div>
+
+    <button id="btn-wcag" class="largo">Usar espaçamento recomendado (WCAG)</button>
+  </section>
+
+  <!-- 3. Cores -------------------------------------------------------->
+  <section aria-labelledby="titulo-cores">
+    <h2 id="titulo-cores">Cores</h2>
+    <!-- Os botões de cor são gerados pelo popup.js a partir de
+         LA.COLOR_SCHEMES (shared/settings.js). -->
+    <div id="cores" class="grade-cores" role="group" aria-labelledby="titulo-cores"></div>
+
+    <div id="cores-personalizadas" class="cores-personalizadas" hidden>
+      <label>Fundo <input type="color" id="customBg"></label>
+      <label>Texto <input type="color" id="customFg"></label>
+    </div>
+  </section>
+
+  <!-- 4. Leitura em voz alta ------------------------------------------>
+  <section aria-labelledby="titulo-voz">
+    <h2 id="titulo-voz">Leitura em voz alta</h2>
+
+    <div class="linha-botoes">
+      <button id="btn-ler-selecao">▶ Ler seleção</button>
+      <button id="btn-ler-pagina">▶ Ler página</button>
+    </div>
+    <div class="linha-botoes">
+      <button id="btn-pausar" disabled>⏸ Pausar</button>
+      <button id="btn-parar" disabled>⏹ Parar</button>
+    </div>
+
+    <!-- aria-live: leitores de tela anunciam quando o texto muda. -->
+    <p id="voz-estado" class="dica" aria-live="polite">Parado.</p>
+
+    <div class="slider">
+      <label for="ttsRate">Velocidade</label>
+      <output for="ttsRate" id="ttsRate-valor"></output>
+      <input type="range" id="ttsRate" min="0.5" max="2" step="0.1">
+    </div>
+
+    <label class="campo" for="ttsVoice">Voz</label>
+    <select id="ttsVoice">
+      <option value="">Automática (português do Brasil)</option>
+    </select>
+    <p id="voz-aviso" class="dica" hidden></p>
+  </section>
+
+  <!-- 5. Restaurar ---------------------------------------------------->
+  <button id="btn-restaurar" class="largo">↺ Restaurar padrão</button>
 
   <script src="../shared/settings.js"></script>
   <script src="popup.js"></script>

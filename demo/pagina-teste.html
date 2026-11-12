@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Página de demonstração – Leitura Acessível</title>
+  <!-- Página feita para a apresentação: mistura texto comum, um site com
+       CSS "teimoso", ícones, código, fórmula e um iframe. Abra com a
+       extensão ligada e mexa no popup. Funciona sem internet. -->
+  <style>
+    body { font-family: Georgia, serif; max-width: 720px; margin: 24px auto; padding: 0 16px; color: #111; }
+    /* CSS "teimoso": seletor específico + !important, como muitos sites fazem. */
+    #conteudo .destaque p { font-family: "Times New Roman", serif !important; letter-spacing: -0.5px !important; }
+    /* Simula uma fonte de ícones: estes elementos NÃO devem mudar de fonte. */
+    .material-icons { font-family: "Material Icons", monospace; color: #1a5fb4; }
+    nav { background: #eee; padding: 8px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <nav><span class="material-icons">menu</span> Início · Cursos · Contato</nav>
+
+  <article>
+    <h1>Dislexia e leitura na web</h1>
+
+    <p>A dislexia é um transtorno específico de aprendizagem que afeta a
+    leitura e a escrita. Ela não tem relação com inteligência. Pequenos
+    ajustes no texto, como uma fonte com letras mais distintas, mais
+    espaço entre linhas e um fundo menos brilhante, podem deixar a leitura
+    mais confortável.</p>
+
+    <div id="conteudo"><div class="destaque">
+      <p>Este parágrafo usa um CSS "teimoso" do site, com
+      <code>!important</code>. Mesmo assim, a extensão consegue trocar a fonte e,
+      ao mexer nos sliders,
+      e os espaçamentos.</p>
+    </div></div>
+
+    <h2>Letras que costumam ser confundidas</h2>
+    <ul>
+      <li>b, d, p, q</li>
+      <li>m, n, u</li>
+      <li>Palavras parecidas: pato, bato, dato</li>
+    </ul>
+
+    <h2>Código e fórmulas continuam iguais</h2>
+    <pre><code>velocidade = distancia / tempo</code></pre>
+    <p>A fórmula <math><mi>F</mi><mo>=</mo><mi>m</mi><mi>a</mi></math> mantém a fonte matemática.</p>
+
+    <p>Para testar a leitura em voz alta, selecione esta frase com o mouse
+    e clique em <strong>Ler seleção</strong> no popup.
+    <a href="https://www.ufabc.edu.br">Este é um link de exemplo.</a></p>
+
+    <h2>Conteúdo dentro de um iframe</h2>
+    <iframe title="Exemplo de iframe" width="100%" height="120"
+      srcdoc="<p style='font-family:Courier'>Este texto está dentro de um iframe e também recebe os ajustes.</p>"></iframe>
+  </article>
+</body>
+</html>

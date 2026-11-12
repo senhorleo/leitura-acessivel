@@ -22,7 +22,7 @@
    * vira um texto sem sentido (ex.: "menu", "search"). Também
    * mantemos código-fonte em fonte monoespaçada e fórmulas matemáticas.
    * ---------------------------------------------------------------- */
-  const EXCLUDED = [
+  const ICONS = [
     // Material Icons / Material Symbols (Google)
     ".material-icons", '[class*="material-icons"]', '[class*="material-symbols"]',
     // Font Awesome ("fa", "fas", "fa-solid", "fa-github"...)
@@ -30,6 +30,10 @@
     // Bootstrap Glyphicons, Bootstrap Icons, Ionicons, Remix, Codicons etc.
     '[class*="glyphicon"]', '[class^="bi-"]', '[class*=" bi-"]',
     '[class*="icon" i]', '[data-icon]',
+  ].join(", ");
+
+  const EXCLUDED = [
+    ICONS,
     // Código e fórmulas (MathJax, KaTeX, MathML)
     "code", "pre", "kbd", "samp", "math",
     "mjx-container", "mjx-container *", ".MathJax", ".MathJax *", ".katex", ".katex *",
@@ -71,6 +75,7 @@
   function buildCss(s) {
     const rules = [];
 
+    /* --- Item 1: fonte ------------------------------------------- */
     if (s.useFont) {
       rules.push(`
         :not(${EXCLUDED}) {
@@ -78,8 +83,62 @@
         }`);
     }
 
-    if (rules.length === 0) return "";
-    return `${fontFaceCss()}\n@layer leitura-acessivel {\n${rules.join("\n")}\n}`;
+    /* --- Item 2: espaçamentos ------------------------------------
+     * Aplicados em todos os elementos (menos ícones), porque muitos
+     * sites definem esses valores elemento por elemento. Valores 0
+     * significam "deixar como o site fez", então nem geramos a regra. */
+    const spacing = [`line-height: ${s.lineHeight} !important;`];
+    if (s.letterSpacing > 0) spacing.push(`letter-spacing: ${s.letterSpacing}em !important;`);
+    if (s.wordSpacing > 0) spacing.push(`word-spacing: ${s.wordSpacing}em !important;`);
+    rules.push(`
+      body :not(${EXCLUDED}) {
+        ${spacing.join("\n        ")}
+      }
+      /* Ícones herdariam o espaçamento do elemento pai, e espaçamento
+       * entre letras desliga as "ligaduras" que o Material Icons usa
+       * para transformar a palavra "menu" no desenho do ícone. */
+      :is(${ICONS}) {
+        letter-spacing: normal !important;
+        word-spacing: normal !important;
+      }`);
+
+    /* --- Item 2: tamanho do texto --------------------------------
+     * Usamos a propriedade "zoom" nos blocos de texto mais externos
+     * (parágrafos, itens de lista, títulos, células...). O ":not(... *)"
+     * evita aplicar duas vezes num bloco que está dentro de outro (ex.:
+     * um <p> dentro de um <li>), o que multiplicaria o aumento.
+     * Diferente do Ctrl + "+", imagens e menus não são ampliados. */
+    if (s.fontSize !== 100) {
+      const blocks = `p, li, dt, dd, blockquote, figcaption, td, th, caption,
+        label, summary, legend, h1, h2, h3, h4, h5, h6, div:not(:has(*))`;
+      rules.push(`
+        :is(${blocks}):not(:is(${blocks}) *) {
+          zoom: ${s.fontSize / 100} !important;
+        }`);
+    }
+
+    /* --- Item 3: cores -------------------------------------------
+     * Pintamos o fundo e o texto de todos os elementos, menos mídias
+     * (imagens, vídeos, gráficos), para não esconder conteúdo visual. */
+    const colors = LA.resolveColors(s);
+    if (colors) {
+      rules.push(`
+        html, body,
+        body *:not(img, picture, video, canvas, svg, svg *, iframe, embed, object) {
+          background-color: ${colors.bg} !important;
+          color: ${colors.fg} !important;
+          border-color: color-mix(in srgb, ${colors.fg} 35%, transparent) !important;
+        }
+        /* ":root" aumenta a especificidade para vencer a regra acima. */
+        :root a, :root a * {
+          color: ${colors.link} !important;
+        }
+        :root a {
+          text-decoration: underline !important;
+        }`);
+    }
+
+    return `${s.useFont ? fontFaceCss() : ""}\n@layer leitura-acessivel {\n${rules.join("\n")}\n}`;
   }
 
   /* Cria (uma vez) e devolve a tag <style> da extensão. */

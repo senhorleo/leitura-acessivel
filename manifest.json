@@ -25,7 +25,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["shared/settings.js", "content/content.js"],
+      "js": ["shared/settings.js", "content/content.js", "content/tts.js"],
       "run_at": "document_start",
       "all_frames": true,
       "match_about_blank": true
